@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "dyna-store"
+version = "0.0.1"
+description = "Dynamic metadata storage"
+authors = ["brightnetwork <dev@brightnetwork.co.uk>"]
+repository = "https://github.com/brightnetwork/dyna-store"
+homepage = "https://github.com/brightnetwork/dyna-store"
+documentation = "https://github.com/brightnetwork/dyna-store"
+keywords = ["id", "meta", "store", "high-cardinality", "metadata"]
+readme = "README.md"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.26.4"
+pydantic = "^2.7.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.3"
+mypy = "^1.9.0"
+pytest = "^8.1.1"
+pyright = "^1.1.355"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["INP001", "D", "COM", "PGH", "ANN101", "ANN204", "A003", "TRY", "EM101", "A001", "ISC001", "C901", "EM102"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**" = ["ANN201", "S101", "FA102", "PLR2004"]
+
+[tool.coverage.report]
+exclude_lines = ["@overload"]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+[tool.pyright]
+strict = ["dyna_store/*.py"]
