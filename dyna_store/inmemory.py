@@ -2,18 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import TypeVar
-
-from pydantic import BaseModel
 
 from .main import DynaStore, Metadata, MetadataId
 
 MD5_HASH_LENGTH = 10
 
-V = TypeVar("V", bound=BaseModel)
 
-
-class InMemoryDynaStore(DynaStore[V]):
+class InMemoryDynaStore(DynaStore):
     def init(self) -> None:
         self.db: dict[MetadataId, Metadata] = {}
 

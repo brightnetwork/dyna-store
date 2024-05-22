@@ -1,19 +1,12 @@
 import pytest
-from pydantic import BaseModel
 
-from dyna_store import (
-    DynaStore,
-    HighCardinality,
-)
+from dyna_store import DynaStore
 
 
 def test_not_implemented_error():
-    class TestModel(BaseModel):
-        data: HighCardinality[int]
-
-    dyna_store = DynaStore(TestModel)
+    dyna_store = DynaStore(hcf=["data"])
     with pytest.raises(NotImplementedError):
-        dyna_store.create(TestModel(data=1))
+        dyna_store.create(data=1)
 
     with pytest.raises(NotImplementedError):
         dyna_store.parse("abc-def")

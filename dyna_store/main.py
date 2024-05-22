@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import enum
 import logging
 from datetime import datetime, timezone
-from typing import Annotated, Any, Generic, NewType, TypeVar
+from typing import Any, NewType, Sequence, TypeVar
 
 import numpy as np
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,23 +12,13 @@ logger.setLevel(logging.INFO)
 Id = NewType("Id", str)  # :$metadataId-$dynamicData
 DynamicData = NewType("DynamicData", str)
 MetadataId = NewType("MetadataId", str)
-Value = str | int | float | datetime | None
-Metadata = dict[str, Value | dict[str, Any]]
+Value = str | int | float | datetime | None | dict[str, "Value"]
+Metadata = dict[str, Value]
 
 BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
 T = TypeVar("T")
-V = TypeVar("V", bound=BaseModel)
-
-
-class Cardinality(enum.Enum):
-    LOW = 1
-    HIGH = 2
-
-
-LowCardinality = Annotated[T, Cardinality.LOW]
-HighCardinality = Annotated[T, Cardinality.HIGH]
 
 
 def b62_encode_int(num: int) -> str:
@@ -71,9 +59,9 @@ def b62_decode_np_float_32(num: str) -> np.float32:
     return np.frombuffer(np.int32(int_).tobytes(), dtype=np.float32)[0]
 
 
-class DynaStore(Generic[V]):
-    def __init__(self, model: type[V]):
-        self._model = model
+class DynaStore:
+    def __init__(self, *, hcf: Sequence[str] = []):
+        self._high_cardinality_fields = set(hcf)
         self.init()
 
     def init(self) -> None:
@@ -94,16 +82,16 @@ class DynaStore(Generic[V]):
     def create_id(self, metadata_id: MetadataId, dynamic_data: DynamicData) -> Id:
         return Id(f"{metadata_id}-{dynamic_data}")
 
-    def parse(self, id_: str) -> V:
+    def parse(self, id_: str) -> dict[str, Value]:
         metadata_id, id = self.parse_id(Id(id_))
         metadata = self.load_metadata(metadata_id)
 
-        to_return: dict[str, Any] = {}
+        to_return: dict[str, Value] = {}
         for field_name in metadata:
             value = metadata.get(field_name)
             if value is not None:
                 if isinstance(value, dict) and value.get("__hcf", None):
-                    encoded_value = id[value["i"] : value["i"] + value["l"]]
+                    encoded_value = id[value["i"] : value["i"] + value["l"]]  # type: ignore
                     decoded_value: Value = None
                     match value["t"]:
                         case "int":
@@ -124,50 +112,39 @@ class DynaStore(Generic[V]):
                 else:
                     to_return[field_name] = value
 
-        return self._model(**to_return)
+        return to_return
 
-    def create(self, fields: V) -> Id:
+    def create(self, **fields: Value) -> Id:
         metadata: Metadata = {}
         id = DynamicData("")
         index = 0
 
-        for field_name, field in fields.model_fields.items():
-            cardinality = None
-            for m in field.metadata:
-                if isinstance(m, Cardinality):
-                    cardinality = m
-                    break
-
-            if not cardinality:
-                raise ValueError(f"Field {field_name} is missing cardinality metadata")
-
-            match cardinality:
-                case Cardinality.LOW:
-                    metadata[field_name] = getattr(fields, field_name)
-                case Cardinality.HIGH:
-                    value = getattr(fields, field_name)
-                    type_ = type(value).__name__
-                    match type_:
-                        case "int":
-                            encoded = b62_encode_int(value)
-                        case "datetime":
-                            encoded = b62_encode_int(int(value.timestamp()))
-                        case "str":
-                            encoded = value
-                        case "float":
-                            encoded = b62_encode_np_float_32(np.float32(value))
-                        case "NoneType":
-                            encoded = ""
-                        case _:
-                            raise ValueError(f"Unsupported type {type_}")
-                    metadata[field_name] = {
-                        "__hcf": 1,  # high cardinality field
-                        "i": index,
-                        "l": len(encoded),
-                        "t": type_,
-                    }
-                    index += len(encoded)
-                    id = DynamicData(id + encoded)
-
+        for key, value in fields.items():
+            value_: Any = value
+            if key in self._high_cardinality_fields:
+                type_ = type(value).__name__
+                match type_:
+                    case "int":
+                        encoded = b62_encode_int(value_)
+                    case "datetime":
+                        encoded = b62_encode_int(int(value_.timestamp()))
+                    case "str":
+                        encoded = value_
+                    case "float":
+                        encoded = b62_encode_np_float_32(np.float32(value_))
+                    case "NoneType":
+                        encoded = ""
+                    case _:
+                        raise ValueError(f"Unsupported type {type_}")
+                metadata[key] = {
+                    "__hcf": 1,  # high cardinality field
+                    "i": index,
+                    "l": len(encoded),
+                    "t": type_,
+                }
+                index += len(encoded)
+                id = DynamicData(id + encoded)
+            else:
+                metadata[key] = value_
         metadata_id = self.save_metadata(metadata)
         return self.create_id(metadata_id, id)
