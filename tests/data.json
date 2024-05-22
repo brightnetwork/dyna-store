@@ -1,0 +1,107 @@
+{
+  "templates": {
+    "a": {
+      "algorithm": "test",
+      "campaign_id": null,
+      "job_id": {
+        "__hcf": 1,
+        "i": 9,
+        "l": 0,
+        "t": "NoneType"
+      },
+      "promoted": false,
+      "rank": {
+        "__hcf": 1,
+        "i": 9,
+        "l": 0,
+        "t": "NoneType"
+      },
+      "score": {
+        "__hcf": 1,
+        "i": 9,
+        "l": 0,
+        "t": "NoneType"
+      },
+      "timestamp": {
+        "__hcf": 1,
+        "i": 3,
+        "l": 6,
+        "t": "datetime"
+      },
+      "user_id": {
+        "__hcf": 1,
+        "i": 0,
+        "l": 3,
+        "t": "int"
+      }
+    },
+    "b": {
+      "algorithm": "test-2",
+      "campaign_id": null,
+      "job_id": {
+        "__hcf": 1,
+        "i": 10,
+        "l": 0,
+        "t": "NoneType"
+      },
+      "promoted": false,
+      "rank": {
+        "__hcf": 1,
+        "i": 16,
+        "l": 0,
+        "t": "NoneType"
+      },
+      "score": {
+        "__hcf": 1,
+        "i": 10,
+        "l": 6,
+        "t": "float"
+      },
+      "timestamp": {
+        "__hcf": 1,
+        "i": 4,
+        "l": 6,
+        "t": "datetime"
+      },
+      "user_id": {
+        "__hcf": 1,
+        "i": 0,
+        "l": 4,
+        "t": "int"
+      }
+    },
+    "c": {
+      "user_id": {
+        "__hcf": 1,
+        "i": 0,
+        "l": 8,
+        "t": "str"
+      }
+    }
+  },
+  "ids": {
+    "a-3BDb2jXPk": {
+      "algorithm": "test",
+      "campaign_id": null,
+      "job_id": null,
+      "promoted": false,
+      "rank": null,
+      "score": null,
+      "timestamp": "2024-05-22 15:13:56+00:00",
+      "user_id": 213123
+    },
+    "b-bpMWb2kebzbmgv68": {
+      "user_id": 298392,
+      "timestamp": "2024-05-23 08:41:59+00:00",
+      "algorithm": "test-2",
+      "job_id": null,
+      "score": 12.238293,
+      "rank": null,
+      "promoted": false,
+      "campaign_id": null
+    },
+    "c-ME4CU6Q=": {
+      "user_id": "a8*z"
+    }
+  }
+}

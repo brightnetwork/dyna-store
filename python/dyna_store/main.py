@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import logging
 from datetime import datetime, timezone
 from typing import Any, NewType, Sequence, TypeVar
@@ -19,6 +20,14 @@ BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
 T = TypeVar("T")
+
+
+def b62_encode_str(str_: str) -> str:
+    return base64.b32encode(str_.encode("utf-8")).decode("utf-8")
+
+
+def b62_decode_str(str_: str) -> str:
+    return base64.b32decode(str_).decode("utf-8")
 
 
 def b62_encode_int(num: int) -> str:
@@ -89,28 +98,27 @@ class DynaStore:
         to_return: dict[str, Value] = {}
         for field_name in metadata:
             value = metadata.get(field_name)
-            if value is not None:
-                if isinstance(value, dict) and value.get("__hcf", None):
-                    encoded_value = id[value["i"] : value["i"] + value["l"]]  # type: ignore
-                    decoded_value: Value = None
-                    match value["t"]:
-                        case "int":
-                            decoded_value = b62_decode_int(encoded_value)
-                        case "datetime":
-                            decoded_value = datetime.fromtimestamp(
-                                b62_decode_int(encoded_value), tz=timezone.utc
-                            )
-                        case "str":
-                            decoded_value = encoded_value
-                        case "NoneType":
-                            decoded_value = None
-                        case "float":
-                            decoded_value = float(b62_decode_np_float_32(encoded_value))
-                        case _:
-                            raise ValueError(value["t"])
-                    to_return[field_name] = decoded_value
-                else:
-                    to_return[field_name] = value
+            if isinstance(value, dict) and value.get("__hcf", None):
+                encoded_value = id[value["i"] : value["i"] + value["l"]]  # type: ignore
+                decoded_value: Value = None
+                match value["t"]:
+                    case "int":
+                        decoded_value = b62_decode_int(encoded_value)
+                    case "datetime":
+                        decoded_value = datetime.fromtimestamp(
+                            b62_decode_int(encoded_value), tz=timezone.utc
+                        )
+                    case "str":
+                        decoded_value = b62_decode_str(encoded_value)
+                    case "NoneType":
+                        decoded_value = None
+                    case "float":
+                        decoded_value = float(b62_decode_np_float_32(encoded_value))
+                    case _:
+                        raise ValueError(value["t"])
+                to_return[field_name] = decoded_value
+            else:
+                to_return[field_name] = value
 
         return to_return
 
@@ -129,7 +137,7 @@ class DynaStore:
                     case "datetime":
                         encoded = b62_encode_int(int(value_.timestamp()))
                     case "str":
-                        encoded = value_
+                        encoded = b62_encode_str(value_)
                     case "float":
                         encoded = b62_encode_np_float_32(np.float32(value_))
                     case "NoneType":
