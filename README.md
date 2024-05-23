@@ -10,6 +10,18 @@ Efficient handling of high cardinality metadata.
 
 In order to explain the main concept, let's go through an example:
 
+
+## How it works
+
+![schema](./docs/schema.png)
+
+Given the id `cwxpd-3BDb2jXPk`:
+1. `cwxpd` is the template id. We can use it to retrieve the template from a database.
+2. the `userId` is an integer encoded in the id as `3BD` -> `213123`
+3. the `timestamp` is an datetime encoded in the id as `b2jXPk` -> `2024-05-22 15:13:56+00:00`
+4. the id can be fully parsed, using both the high cardinality fields (`user_id`, `timestamp`) from the id itself and the other fields (`algorithm`, `promoted`) in the template.
+
+
 ## Use case
 
 We have an online shopping website, where user are shown recommended products.
