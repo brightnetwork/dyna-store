@@ -88,7 +88,7 @@ class Recommendation:
     algorithm: str
 
 # create a store by extending the DynaStore class
-class RecommendationStore(DynaStore[Recommendation]):
+class RecommendationStore(DynaStore):
     def save_metadata(self, _metadata: Metadata) -> MetadataId:
         # here you need to handle the saving of the metadata
         # could be in your database, in a file, etc.
