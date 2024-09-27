@@ -79,17 +79,13 @@ In some cases, that can lead to a drastic reduction of the amount of data stored
 ```python3
 from datetime import datetime
 
-from dyna_store import DynaStore, HighCardinality, LowCardinality, Metadata, MetadataId
-from pydantic import BaseModel
+from dyna_store import DynaStore, Metadata, MetadataId
 
-# create a pydantic model for your recommendations metadata
-# you need to wrap your fields in either HighCardinality or LowCardinality
-# HighCardinality fields will be stored in the id
-# LowCardinality fields will be stored in the templates
-class Recommendation(BaseModel):
-    userId: HighCardinality[str]
-    timestamp: HighCardinality[datetime]
-    algorithm: LowCardinality[str]
+# a model for your recommendations metadata
+class Recommendation:
+    user_id: int
+    timestamp: datetime
+    algorithm: str
 
 # create a store by extending the DynaStore class
 class RecommendationStore(DynaStore[Recommendation]):
@@ -104,10 +100,10 @@ class RecommendationStore(DynaStore[Recommendation]):
         # could from your database, from a file, etc.
         pass
 
-store = RecommendationStore(Recommendation)
+store = RecommendationStore(hcf=["user_id", "timestamp"])
 
 # saving recommendations
-id = store.create(Recommendation(userId="user1", timestamp=datetime.now(), algorithm="algo-1"))
+id = store.create(Recommendation(user_id="user1", timestamp=datetime.now(), algorithm="algo-1"))
 # returns a Recommendation id
 
 # loading recommendations

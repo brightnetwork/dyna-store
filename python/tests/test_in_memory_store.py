@@ -19,7 +19,6 @@ def test_simple_case():
 
 
 class Recommendation:
-    # All types must be annotated with their cardinality.
     user_id: int
     timestamp: datetime
     algorithm: str
