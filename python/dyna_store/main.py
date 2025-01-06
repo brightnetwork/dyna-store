@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import base64
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
 from datetime import datetime, timezone
-from typing import Any, NewType, Sequence, TypeVar
+from typing import Any, NewType, TypeVar
 
 import numpy as np
 
