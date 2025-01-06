@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dyna-store"
-version = "0.0.5"
+version = "0.0.6"
 description = "Dynamic metadata storage"
 authors = ["brightnetwork <dev@brightnetwork.co.uk>"]
 repository = "https://github.com/brightnetwork/dyna-store"
